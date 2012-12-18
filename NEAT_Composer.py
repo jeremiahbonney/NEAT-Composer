@@ -156,7 +156,7 @@ def main():
         x = x+1
       leader_list.append(get_leader(genome_list))
     
-    elif(choice == "3"):
+    elif(choice == "3"): #Selects a member of the population and sets its fitness manually
       song_select = raw_input("What member's fitness do you want to set?\n")
       new_fit = raw_input("Enter desired fitness\n")
       old_fit = genome_list[int(song_select) - 1].GetFitness()
@@ -180,7 +180,7 @@ def main():
       for genomes in genome_list:
         gen_Song(genomes)
      
-    elif(choice == "7"):
+    elif(choice == "7"): #Prints the leaders of each generation
       x = 1
       for leader in leader_list:
         print "Member", leader[0]+1, "in gen", x, "has fitness of", leader[2]
