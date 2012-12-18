@@ -1,5 +1,5 @@
 import MultiNEAT as NEAT
-#from mingus.midi import fluidsynth
+from mingus.midi import fluidsynth
 from mingus.containers.Track import Track
 from mingus.containers.Bar import Bar
 from mingus.containers.Note import Note
@@ -12,7 +12,7 @@ notes = [] #Holds all possible notes
 song_pop=[] #Contains the song rep of every network in current gen
 leader_list = [] #Contains a list of current leaders (see get_leader method)
 
-#fluidsynth.init("FluidR3_GM.sf2", "alsa")
+fluidsynth.init("FluidR3_GM.sf2", "alsa") #for windows systems, go ahead and remove the comma and "alsa"
 
 #Various parameters for NEAT...will probably change a lot of this
 params = NEAT.Parameters()
@@ -84,11 +84,10 @@ def evaluate(song): #Checks ratio of notes in a song are in a certain scale to t
 
 
 def play_song(pop_member): #Plays a selected song
- # fluidsynth.play_Track(pop_member, 1, 150)
- # return
-  pass
+  fluidsynth.play_Track(pop_member, 1, 150) #For increased/decreased tempo, change the 150
+  return
 
-def print_pop(): #This print method sucks, find one that prints in straight line
+def print_pop(): #Prints the population of songs
   x = 1
   for song in song_pop:
     print x
