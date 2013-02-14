@@ -3,7 +3,7 @@
 #functions and other messy stuff in the fitness_func.py file.
 
 import MultiNEAT as NEAT
-#from mingus.midi import fluidsynth   Commented out until they work on lab machines
+#from mingus.midi import fluidsynth  # Commented out until they work on lab machines
 #from mingus.midi import MidiFileOut
 from mingus.containers.Track import Track
 from mingus.containers.Bar import Bar
