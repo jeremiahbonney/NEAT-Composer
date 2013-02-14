@@ -102,7 +102,7 @@ Population::Population(const Genome& a_Seed, const Parameters& a_Parameters, boo
 }
 
 
-Population::Population(const char *a_FileName)
+Population::Population(char *a_FileName)
 {
     m_BestFitnessEver = 0.0;
 
@@ -163,7 +163,7 @@ Population::Population(const char *a_FileName)
 
 
 // Save a whole population to a file
-void Population::Save(const char* a_FileName)
+void Population::Save(char* a_FileName)
 {
     FILE* t_file = fopen(a_FileName, "w");
 
@@ -437,15 +437,6 @@ void Population::UpdateSpecies()
 // the epoch method - the heart of the GA
 void Population::Epoch()
 {
-	// So, all genomes are evaluated..
-    for(unsigned int i=0; i<m_Species.size(); i++)
-    {
-        for(unsigned int j=0; j<m_Species[i].m_Individuals.size(); j++)
-        {
-        	m_Species[i].m_Individuals[j].SetEvaluated();
-        }
-    }
-
     // Sort each species's members by fitness and the species by fitness
     Sort();
 
@@ -540,7 +531,7 @@ void Population::Epoch()
     // in case there are more than 2, of course
     if (m_Parameters.DeltaCoding)
     {
-        if (m_GensSinceBestFitnessLastChanged > (m_Parameters.SpeciesMaxStagnation + 10))
+        if (m_GensSinceBestFitnessLastChanged > (m_Parameters.SpeciesDropoffAge + 10))
         {
             // make the top 2 reproduce by 50% individuals
             // and the rest - no offspring
@@ -653,15 +644,11 @@ void Population::Epoch()
 
 
     // Kill all bad performing individuals
-    // Todo: this baby/adult/killworst scheme is complicated and basically sucks,
-    // I should remove it completely.
-   // for(unsigned int i=0; i<m_Species.size(); i++) m_Species[i].KillWorst(m_Parameters);
+    for(unsigned int i=0; i<m_Species.size(); i++) m_Species[i].KillWorst(m_Parameters);
 
     // Perform reproduction for each species
     m_TempSpecies.clear();
     m_TempSpecies = m_Species;
-    for(unsigned int i=0; i<m_TempSpecies.size(); i++)
-    	m_TempSpecies[i].Clear();
 
     for(unsigned int i=0; i<m_Species.size(); i++)
     {
@@ -674,9 +661,7 @@ void Population::Epoch()
 
 
     // Now we kill off the old parents
-    // Todo: this baby/adult scheme is complicated and basically sucks,
-    // I should remove it completely.
-   // for(unsigned int i=0; i<m_Species.size(); i++) m_Species[i].KillOldParents();
+    for(unsigned int i=0; i<m_Species.size(); i++) m_Species[i].KillOldParents();
 
     // Here we kill off any empty species too
     // Remove all empty species (cleanup routine for every case..)
@@ -1277,6 +1262,7 @@ bool Population::NoveltySearchTick(Genome& a_SuccessfulGenome)
     // Now we assign a fitness score based on the sparseness
     // This is still now clear how, but for now fitness = sparseness
     t_new_baby->SetFitness( t_sparseness );
+    t_new_baby->Adult();
 
     a_SuccessfulGenome = *t_new_baby;
 

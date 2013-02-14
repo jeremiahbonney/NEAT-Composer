@@ -146,11 +146,13 @@ inline double af_linear(double aX, double aShift)
 
 double unsigned_sigmoid_derivative(double x)
 {
+	;
 	return x * (1 - x);
 }
 
 double tanh_derivative(double x)
 {
+	;
 	return 1 - x * x;
 }
 
@@ -598,7 +600,7 @@ void NeuralNetwork::Input(std::vector<double>& a_Inputs)
 	}
 }
 
-void NeuralNetwork::Input_python_list(py::list& a_Inputs)
+void NeuralNetwork::Input(py::list& a_Inputs)
 {
 	int len = py::len(a_Inputs);
 	std::vector<double> inp;
@@ -614,21 +616,6 @@ void NeuralNetwork::Input_python_list(py::list& a_Inputs)
 	Input(inp);
 }
 
-void NeuralNetwork::Input_numpy(py::numeric::array& a_Inputs)
-{
-	int len = py::len(a_Inputs);
-	std::vector<double> inp;
-	inp.resize(len);
-	for(int i=0; i<len; i++)
-		inp[i] = py::extract<double>(a_Inputs[i]);
-
-	// if the number of passed inputs differs from the actual number of inputs,
-	// clip them to fit.
-	if (inp.size() != m_num_inputs)
-		inp.resize(m_num_inputs);
-
-	Input(inp);
-}
 
 std::vector<double> NeuralNetwork::Output()
 {
@@ -795,7 +782,7 @@ void NeuralNetwork::RTRL_update_weights()
 	m_total_error = 0;
 }
 
-void NeuralNetwork::Save(const char* a_filename)
+void NeuralNetwork::Save(char* a_filename)
 {
 	FILE* fil = fopen(a_filename, "w");
 	Save(fil);
@@ -925,7 +912,7 @@ bool NeuralNetwork::Load(std::ifstream& a_DataFile)
 
     return true;
 }
-bool NeuralNetwork::Load(const char *a_filename)
+bool NeuralNetwork::Load(char *a_filename)
 {
     std::ifstream t_DataFile(a_filename);
     return Load(t_DataFile);

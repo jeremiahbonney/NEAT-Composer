@@ -59,6 +59,7 @@ Genome::Genome()
     m_NumOutputs=0;
     m_AdjustedFitness = 0;
     m_OffspringAmount = 0;
+    m_Parent = false;
     m_Evaluated = false;
     m_PhenotypeBehavior = NULL;
 }
@@ -76,6 +77,7 @@ Genome::Genome(const Genome& a_G)
     m_NumOutputs  = a_G.m_NumOutputs;
     m_AdjustedFitness = a_G.m_AdjustedFitness;
     m_OffspringAmount = a_G.m_OffspringAmount;
+    m_Parent = a_G.m_Parent;
     m_Evaluated = a_G.m_Evaluated;
     m_PhenotypeBehavior = a_G.m_PhenotypeBehavior;
 }
@@ -95,6 +97,7 @@ Genome& Genome::operator =(const Genome& a_G)
         m_NumInputs   = a_G.m_NumInputs;
         m_NumOutputs  = a_G.m_NumOutputs;
         m_OffspringAmount = a_G.m_OffspringAmount;
+        m_Parent    = a_G.m_Parent;
         m_Evaluated = a_G.m_Evaluated;
         m_PhenotypeBehavior = a_G.m_PhenotypeBehavior;
     }
@@ -239,6 +242,8 @@ Genome::Genome(unsigned int a_ID,
     m_OffspringAmount = 0.0;
     m_Depth = 0;
     m_PhenotypeBehavior = NULL;
+
+    Birth();
 }
 
 // A little helper function to find the index of a neuron, given its ID
@@ -455,6 +460,7 @@ void Genome::BuildHyperNEATPhenotype(NeuralNetwork& net, Substrate& subst)
         net.AddNeuron(t_n);
     }
 
+
     // Hidden
     for(unsigned int i=0; i<subst.m_hidden_coords.size(); i++)
     {
@@ -470,6 +476,7 @@ void Genome::BuildHyperNEATPhenotype(NeuralNetwork& net, Substrate& subst)
         net.AddNeuron(t_n);
     }
 
+
     // Output
     for(unsigned int i=0; i<subst.m_output_coords.size(); i++)
     {
@@ -484,6 +491,7 @@ void Genome::BuildHyperNEATPhenotype(NeuralNetwork& net, Substrate& subst)
 
         net.AddNeuron(t_n);
     }
+
 
 	// Begin querying the CPPN
     // Create the neural network that will represent the CPPN
@@ -846,24 +854,69 @@ bool Genome::IsCompatibleWith(Genome& a_G, Parameters& a_Parameters)
 // Returns a random activation function from the canonical set based ot probabilities
 ActivationFunction GetRandomActivation(Parameters& a_Parameters, RNG& a_RNG)
 {
-	std::vector<double> t_probs;
+    int t_numtries = 128;
+    for(int i=0; i < t_numtries; i++)
+    {
+        if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_SignedSigmoid_Prob)
+        {
+            return SIGNED_SIGMOID;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_UnsignedSigmoid_Prob)
+        {
+            return UNSIGNED_SIGMOID;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_Tanh_Prob)
+        {
+            return TANH;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_TanhCubic_Prob)
+        {
+            return TANH_CUBIC;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_SignedStep_Prob)
+        {
+            return SIGNED_STEP;
+        }
+        if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_UnsignedStep_Prob)
+        {
+            return UNSIGNED_STEP;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_SignedGauss_Prob)
+        {
+            return SIGNED_GAUSS;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_UnsignedGauss_Prob)
+        {
+            return UNSIGNED_GAUSS;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_Abs_Prob)
+        {
+            return ABS;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_SignedSine_Prob)
+        {
+            return SIGNED_SINE;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_UnsignedSine_Prob)
+        {
+            return UNSIGNED_SINE;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_SignedSquare_Prob)
+        {
+            return SIGNED_SQUARE;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_UnsignedSquare_Prob)
+        {
+            return UNSIGNED_SQUARE;
+        }
+        else if (a_RNG.RandFloat() < a_Parameters.ActivationFunction_Linear_Prob)
+        {
+            return LINEAR;
+        }
+    }
 
-	t_probs.push_back(a_Parameters.ActivationFunction_SignedSigmoid_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_UnsignedSigmoid_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_Tanh_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_TanhCubic_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_SignedStep_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_UnsignedStep_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_SignedGauss_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_UnsignedGauss_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_Abs_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_SignedSine_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_UnsignedSine_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_SignedSquare_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_UnsignedSquare_Prob);
-	t_probs.push_back(a_Parameters.ActivationFunction_Linear_Prob);
-
-	return (NEAT::ActivationFunction)a_RNG.Roulette(t_probs);
+    // Give up, return the default - sigmoid
+    return UNSIGNED_SIGMOID;
 }
 
 
@@ -996,12 +1049,7 @@ bool Genome::Mutate_AddNeuron(InnovationDatabase &a_Innovs, Parameters& a_Parame
         Scale(t_A,  0, 1, a_Parameters.MinActivationA, a_Parameters.MaxActivationA);
         Scale(t_B,  0, 1, a_Parameters.MinActivationB, a_Parameters.MaxActivationB);
         Scale(t_TC, 0, 1, a_Parameters.MinNeuronTimeConstant, a_Parameters.MaxNeuronTimeConstant);
-        //Scale(t_Bs, 0, 1, a_Parameters.MinNeuronBias, a_Parameters.MaxNeuronBias);
-
-        Clamp(t_A, a_Parameters.MinActivationA, a_Parameters.MaxActivationA);
-        Clamp(t_B, a_Parameters.MinActivationB, a_Parameters.MaxActivationB);
-        Clamp(t_TC, a_Parameters.MinNeuronTimeConstant, a_Parameters.MaxNeuronTimeConstant);
-        Clamp(t_Bs, a_Parameters.MinNeuronBias, a_Parameters.MaxNeuronBias);
+        //Scale(t_Bs, 0, 1, GlobalParameters.MinNeuronBias, GlobalParameters.MaxNeuronBias);
 
         // Initialize the neuron gene's properties
         t_ngene.Init( t_A,
@@ -1089,11 +1137,6 @@ bool Genome::Mutate_AddNeuron(InnovationDatabase &a_Innovs, Parameters& a_Parame
         Scale(t_B,  0, 1, a_Parameters.MinActivationB, a_Parameters.MaxActivationB);
         Scale(t_TC, 0, 1, a_Parameters.MinNeuronTimeConstant, a_Parameters.MaxNeuronTimeConstant);
         //Scale(t_Bs, 0, 1, GlobalParameters.MinNeuronBias, GlobalParameters.MaxNeuronBias);
-
-        Clamp(t_A, a_Parameters.MinActivationA, a_Parameters.MaxActivationA);
-        Clamp(t_B, a_Parameters.MinActivationB, a_Parameters.MaxActivationB);
-        Clamp(t_TC, a_Parameters.MinNeuronTimeConstant, a_Parameters.MaxNeuronTimeConstant);
-        Clamp(t_Bs, a_Parameters.MinNeuronBias, a_Parameters.MaxNeuronBias);
 
         // Initialize the neuron gene's properties
         t_ngene.Init( t_A,
@@ -1217,7 +1260,7 @@ bool Genome::Mutate_AddLink(InnovationDatabase &a_Innovs, Parameters& a_Paramete
         else
         {
             t_NumTries = 0;
-            // try to find a standard forward connection
+            // try to find a standart forward connection
             do
             {
                 t_n1idx = a_RNG.RandInt(0, static_cast<int>(NumNeurons()-1));
@@ -1318,7 +1361,7 @@ bool Genome::Mutate_AddLink(InnovationDatabase &a_Innovs, Parameters& a_Paramete
     int t_innovid = a_Innovs.CheckInnovation(t_n1id, t_n2id, NEW_LINK);
 
     // Choose the weight for this link
-    double t_weight = a_RNG.RandFloatClamped() * a_Parameters.WeightReplacementMaxPower;
+    double t_weight = a_RNG.RandFloatClamped();// * GlobalParameters.WeightReplacementMaxPower;
 
     // A novel innovation?
     if (t_innovid == -1)
@@ -1705,12 +1748,8 @@ bool Genome::Mutate_RemoveSimpleNeuron(InnovationDatabase& a_Innovs, RNG& a_RNG)
 // Perturbs the weights
 void Genome::Mutate_LinkWeights(Parameters& a_Parameters, RNG& a_RNG)
 {
-#if 0
     // The end part of the genome
-	// Note - in the beginning of evolution, the genome tail (the new genes) does not
-	// yet exist and this becomes difficult for the kickstart in the right
-	// direction. todo: fix this issue
-    unsigned int t_genometail = static_cast<unsigned int>(NumLinks() * 0.99);
+    unsigned int t_genometail = static_cast<unsigned int>(NumLinks() * 0.8);
 
     // This tells us if this mutation will shake things up
     bool t_severe_mutation;
@@ -1784,40 +1823,6 @@ void Genome::Mutate_LinkWeights(Parameters& a_Parameters, RNG& a_RNG)
         Clamp(t_LinkGenesWeight, -a_Parameters.MaxWeight, a_Parameters.MaxWeight);
         m_LinkGenes[i].SetWeight(t_LinkGenesWeight);
     }
-
-#else
-
-    // This tells us if this mutation will shake things up
-    bool t_severe_mutation;
-
-    if (a_RNG.RandFloat() < a_Parameters.MutateWeightsSevereProb)
-    {
-        t_severe_mutation = true;
-    }
-    else
-    {
-        t_severe_mutation = false;
-    }
-
-     // For all links..
-     for(unsigned int i=0; i<NumLinks(); i++)
-     {
-         double t_LinkGenesWeight = m_LinkGenes[i].GetWeight();
-
-         if (a_RNG.RandFloat() < a_Parameters.WeightMutationRate)
-    	 {
-    		 if (t_severe_mutation)
-    			 t_LinkGenesWeight  = a_RNG.RandFloatClamped() * a_Parameters.WeightReplacementMaxPower;
-    		 else
-    			 t_LinkGenesWeight += a_RNG.RandFloatClamped() * a_Parameters.WeightMutationMaxPower;
-    	 }
-
-         Clamp(t_LinkGenesWeight, -a_Parameters.MaxWeight, a_Parameters.MaxWeight);
-         m_LinkGenes[i].SetWeight(t_LinkGenesWeight);
-     }
-
-
-#endif
 }
 
 
@@ -2257,20 +2262,20 @@ Genome Genome::Mate(Genome& a_Dad, bool a_MateAverage, bool a_InterSpecies, RNG&
     // Sort the baby's genes
     t_baby.SortGenes();
 
-/*    if (t_baby.NumLinks() == 0)
+    if (t_baby.NumLinks() == 0)
     {
-//        std::cout << "No links in baby after crossover" << std::endl;
+        std::cout << "No links in baby after crossover" << std::endl;
 //		int p;
 //		std::cin >> p;
     }
 
     if (t_baby.HasDeadEnds())
     {
-//        std::cout << "Dead ends in baby after crossover" << std::endl;
+        std::cout << "Dead ends in baby after crossover" << std::endl;
 //		int p;
 //		std::cin >> p;
     }
-*/
+
     // OK here is the baby
     return t_baby;
 }
@@ -2387,7 +2392,7 @@ void Genome::CalculateDepth()
 //////////////////////////////////////////////////////////////////////////////////
 
 // Builds this genome from a file
-Genome::Genome(const char* a_FileName)
+Genome::Genome(char* a_FileName)
 {
     std::ifstream t_DataFile(a_FileName);
     *this = Genome(t_DataFile);
@@ -2484,7 +2489,7 @@ Genome::Genome(std::ifstream& a_DataFile)
 
 
 // Saves this genome to a file
-void Genome::Save(const char* a_FileName)
+void Genome::Save(char* a_FileName)
 {
     FILE* t_file;
     t_file = fopen(a_FileName, "w");

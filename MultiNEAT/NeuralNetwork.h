@@ -31,8 +31,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <boost/python.hpp>
-#include <boost/python/numeric.hpp>
-#include <boost/python/tuple.hpp>
 
 namespace py = boost::python;
 
@@ -147,8 +145,7 @@ public:
     void FlushCube(); // clears the sensitivity cube
 
     void Input(std::vector<double>& a_Inputs);
-    void Input_python_list(py::list& a_Inputs);
-    void Input_numpy(py::numeric::array& a_Inputs);
+    void Input(py::list& a_Inputs);
     std::vector<double> Output();
 
     // accessor methods
@@ -186,8 +183,8 @@ public:
     }
 
     // one-shot save/load
-    void Save(const char* a_filename);
-    bool Load(const char* a_filename);
+    void Save(char* a_filename);
+    bool Load(char* a_filename);
 
     // save/load from already opened files for reading/writing
     void Save(FILE* a_file);
