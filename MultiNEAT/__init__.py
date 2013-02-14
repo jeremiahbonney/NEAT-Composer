@@ -1,7 +1,9 @@
+import os
 import sys
 import multiprocessing as mpc
 import time
 from Release.MultiNEAT import *
+        
 
 try:
     from progressbar import ProgressBar, Counter, ETA, AnimatedMarker
@@ -19,6 +21,13 @@ except:
     print 'Tip: install the OpenCV computer vision library (2.0+) with Python bindings'
     print '     to get convenient neural network visualization to NumPy arrays'
     cvnumpy_installed = False
+    
+# NetworkX support
+try:
+    import networkx as nx
+    networkx_installed = True
+except:
+    networkx_installed = False
 
 # Get all genomes from the population
 def GetGenomeList(pop):
@@ -115,7 +124,7 @@ def AlmostEqual(a,b, margin):
 # Neural Network display code
 # rect is a tuple in the form (x, y, size_x, size_y)
 if not cvnumpy_installed:
-    def DrawPhenotype(image, rect, nn, neuron_radius=10, max_line_thickness=3):
+    def DrawPhenotype(image, rect, nn, neuron_radius=10, max_line_thickness=3, substrate=False):
         pass
 else:
     MAX_DEPTH = 250

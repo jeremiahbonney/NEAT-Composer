@@ -120,13 +120,13 @@ BOOST_PYTHON_MODULE(MultiNEAT)
 			.def_readwrite("substrate_coords", &Neuron::m_substrate_coords)
 			;
 
-	void (NeuralNetwork::*NN_Save)(char*) = &NeuralNetwork::Save;
-	bool (NeuralNetwork::*NN_Load)(char*) = &NeuralNetwork::Load;
-	void (Genome::*Genome_Save)(char*) = &Genome::Save;
+	void (NeuralNetwork::*NN_Save)(const char*) = &NeuralNetwork::Save;
+	bool (NeuralNetwork::*NN_Load)(const char*) = &NeuralNetwork::Load;
+	void (Genome::*Genome_Save)(const char*) = &Genome::Save;
 	void (NeuralNetwork::*NN_Input)(list&) = &NeuralNetwork::Input_python_list;
 	void (NeuralNetwork::*NN_Input_numpy)(numeric::array&) = &NeuralNetwork::Input_numpy;
-	void (Parameters::*Parameters_Save)(char*) = &Parameters::Save;
-	int (Parameters::*Parameters_Load)(char*) = &Parameters::Load;
+	void (Parameters::*Parameters_Save)(const char*) = &Parameters::Save;
+	int (Parameters::*Parameters_Load)(const char*) = &Parameters::Load;
 
 	class_<NeuralNetwork>("NeuralNetwork", init<>())
 

@@ -3,8 +3,8 @@
 #functions and other messy stuff in the fitness_func.py file.
 
 import MultiNEAT as NEAT
-from mingus.midi import fluidsynth
-from mingus.midi import MidiFileOut
+#from mingus.midi import fluidsynth   Commented out until they work on lab machines
+#from mingus.midi import MidiFileOut
 from mingus.containers.Track import Track
 from mingus.containers.Bar import Bar
 from mingus.containers.Note import Note
@@ -101,7 +101,8 @@ class Song:
     return
 
   def export_song(self, filename):
-    MidiFileOut.write_Track(filename, self.song, self.bpm, 0)
+   # MidiFileOut.write_Track(filename, self.song, self.bpm, 0)
+    pass
     
 #End of Song Class
 
@@ -131,7 +132,7 @@ def main():
 
 #Main program loop
   while(1):
-    choice = raw_input("Choose one of the following\n1) Print population\n2) Eval pop with fitness function\n3) Manually assign fitness\n4) Print fitness of POP\n5) Play a song\n6) Advance to next Generation\n7) Exit\n")
+    choice = raw_input("Choose one of the following\n1) Print population\n2) Eval pop with fitness function\n3) Manually assign fitness\n4) Print fitness of POP\n5) Play a song\n6) Advance to next Generation\n7) Export song to midi file\n8)  Exit\n")
   
     if(choice == "1"): #Goes through and prints all songs
       for song in song_list:
@@ -175,9 +176,13 @@ def main():
         song_list.append(c)
         song_list[x-1].gen_song()
         x = x + 1
-        
 
-    elif(choice == "7"): #exits program
+    elif(choice == "7"): #Exports to midi file
+      song_choice = (int)(raw_input("Which song would you like to export?\n"))
+      file_name = raw_input("Enter filename of midi file you want to create?\n")
+      song_list[song_choice-1].export_song(file_name)
+
+    elif(choice == "8"): #exits program
       sys.exit("Program exited")
 
 main()
