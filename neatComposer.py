@@ -112,27 +112,29 @@ def evaluate(a_song, fitness_func):      #Takes a song and fitness function, the
   return 				         #song_fitness attribute
 
 
+def advance_gen(genome_list):  #Advances population to next generation
+  global GEN_NUM
+  song_list = []
+  x = 1
+  GEN_NUM = GEN_NUM+1
+  for genomes in genome_list:
+    c = Song(genomes, GEN_NUM, x, LENGTH)
+    song_list.append(c)
+    song_list[x-1].gen_song()
+    x = x+1
+  return song_list
 
 def main():
-  global GEN_NUM
   #creates default NEAT Genome
   
   
   population = NEAT.Population(genome, params, True, 1.0)
   genome_list = NEAT.GetGenomeList(population)
-  song_list = []
-  x = 1
-  GEN_NUM = GEN_NUM + 1
-  for genomes in genome_list: #goes through every genome, puts it in a Song object
-                             #and adds that to a list making up the population
-    c = Song(genomes, GEN_NUM, x, LENGTH)
-    song_list.append(c)
-    song_list[x-1].gen_song()
-    x = x+1
+  song_list = advance_gen(genome_list)
 
 #Main program loop
   while(1):
-    choice = raw_input("Choose one of the following\n1) Print population\n2) Eval pop with fitness function\n3) Manually assign fitness\n4) Print fitness of POP\n5) Play a song\n6) Advance to next Generation\n7) Export song to midi file\n8)  Exit\n")
+    choice = raw_input("Choose one of the following\n1) Print population\n2) Eval pop with fitness function\n3) Manually assign fitness\n4) Print fitness of POP\n5) Play a song\n6) Advance to next Generation\n7) Export song to midi file\n8) Exit\n")
   
     if(choice == "1"): #Goes through and prints all songs
       for song in song_list:
@@ -167,15 +169,9 @@ def main():
   
     elif(choice == "6"): #Advances to next generation and gets new population/songs
       population.Epoch()
-      song_list = []
       genome_list = NEAT.GetGenomeList(population)
-      x = 1
-      GEN_NUM = GEN_NUM + 1
-      for genomes in genome_list:
-        c = Song(genomes, GEN_NUM, x, LENGTH) 
-        song_list.append(c)
-        song_list[x-1].gen_song()
-        x = x + 1
+      song_list = advance_gen(genome_list)
+      
 
     elif(choice == "7"): #Exports to midi file
       song_choice = (int)(raw_input("Which song would you like to export?\n"))
