@@ -2,10 +2,8 @@
 #and hopefully make transfering to a GUI easier. Also puts fitness
 #functions and other messy stuff in the fitness_func.py file.
 
-#IMPORTANT! Need to see if it's necessary to set fitness manually in genome
-#or if its done implicitly
-
-import MultiNEAT as NEAT
+#import MultiNEAT as NEAT
+import MultiNEAT64 as NEAT
 #from mingus.midi import fluidsynth  # Commented out until they work on lab machines
 #from mingus.midi import MidiFileOut
 from mingus.containers.Track import Track
