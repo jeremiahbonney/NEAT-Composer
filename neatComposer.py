@@ -2,6 +2,9 @@
 #and hopefully make transfering to a GUI easier. Also puts fitness
 #functions and other messy stuff in the fitness_func.py file.
 
+#IMPORTANT! Need to see if it's necessary to set fitness manually in genome
+#or if its done implicitly
+
 import MultiNEAT as NEAT
 #from mingus.midi import fluidsynth  # Commented out until they work on lab machines
 #from mingus.midi import MidiFileOut
@@ -107,8 +110,10 @@ class Song:
 #End of Song Class
 
 
-def evaluate(a_song, fitness_func):      #Takes a song and fitness function, then evaluates
-  a_song.fitness = fitness_func(a_song)	 #the song via that fitness function. Also sets the
+def evaluate(a_song, fitness_func, genome, *args):      #Takes a song and fitness function, then evaluates
+  a_song.fitness = fitness_func(a_song, *args)
+  genome.SetFitness(a_song.fitness); 
+	 #the song via that fitness function. Also sets the
   return 				         #song_fitness attribute
 
 
@@ -143,14 +148,29 @@ def main():
     elif(choice == "2"): #User picks a fitness function and all songs are evaluated 
   		     #using that fitness function. Can happen for many generations
       func_choice = raw_input("Select fitness function: diatonic, or in_range\n")
-      for song in song_list:
-        evaluate(song, (fitness_func.functions[func_choice]))
-        #genome[x].SetFitness(song.fitness) #Just in case I need to go back to the actual
-					 #genome thing, since I think that's what's used
-					 #by popEpoch
+      args = ()
+      if(func_choice == "in_range"):
+        arg1 = raw_input("Enter a lower range: \n")
+	arg2 = raw_input("Enter an upper range: \n")
+	args = (arg1, arg2)
 
+      num_repeats = raw_input("How many gens would you like to run?\n")
+      for x in range(0, int(num_repeats)):
+	y = 0
+        for genomes in genome_list:
+          evaluate(song_list[y], (fitness_func.functions[func_choice]),genomes, *args )
+	  y = y + 1
+	  
+	population.Epoch()
+	genome_list = NEAT.GetGenomeList(population)
+	song_list = advance_gen(genome_list)
+    
+      y = 0
       for genomes in genome_list:
-        genomes.SetFitness(song.fitness)
+        evaluate(song_list[y], (fitness_func.functions[func_choice]),genomes, *args )
+        y = y + 1
+
+
 
     elif(choice == "3"): #Pick a song out of the population and change it's fitness
       song_choice = raw_input("Which song's fitness would you like to change?\n")
@@ -168,6 +188,9 @@ def main():
       song_list[song_choice-1].play_song()
   
     elif(choice == "6"): #Advances to next generation and gets new population/songs
+      y = 0
+      for genomes in genome_list: #Shouldn't be necessary, but just in case
+	genomes.SetFitness(song_list[y].fitness)
       population.Epoch()
       genome_list = NEAT.GetGenomeList(population)
       song_list = advance_gen(genome_list)

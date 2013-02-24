@@ -20,7 +20,7 @@ note_list = ['A-0', 'A#-0', 'B-0', 'C-1', 'C#-1', 'D-1', 'D#-1', 'E-1', 'F-1', '
 #Dictionary of all fitness functions, making it easier to call them
 
 
-def is_diatonic(a_song):  #Checks to see if all notes are diatonic (no # or b)
+def is_diatonic(a_song, *args):  #Checks to see if all notes are diatonic (no # or b)
   sum = 0
   fitness = 0
   length = int(a_song.length)
@@ -34,9 +34,10 @@ def is_diatonic(a_song):  #Checks to see if all notes are diatonic (no # or b)
   return a_song.fitness
 
 
-def in_range(upper, lower, a_song):  #Checks to see if all notes fall within a certain range
+def in_range(a_song, *args):  #Checks to see if all notes fall within a certain range
   sum = 0
-  fitness = 0
+  lower = args[0]
+  upper = args[1]
   length = int(a_song.length)
   for x in range(0, length):
     note = a_song.song[x/4][x%4][2][0]
