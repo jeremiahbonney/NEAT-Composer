@@ -2,8 +2,8 @@
 #and hopefully make transfering to a GUI easier. Also puts fitness
 #functions and other messy stuff in the fitness_func.py file.
 
-#import MultiNEAT as NEAT
-import MultiNEAT64 as NEAT
+
+import MultiNEAT as NEAT
 #from mingus.midi import fluidsynth  # Commented out until they work on lab machines
 #from mingus.midi import MidiFileOut
 from mingus.containers.Track import Track
@@ -112,7 +112,7 @@ def evaluate(a_song, fitness_func, genome, *args):      #Takes a song and fitnes
   a_song.fitness = fitness_func(a_song, *args)
   genome.SetFitness(a_song.fitness); 
 	 #the song via that fitness function. Also sets the
-  return 				         #song_fitness attribute
+  return a_song.fitness 				         #song_fitness attribute
 
 
 def advance_gen(genome_list):  #Advances population to next generation
@@ -155,10 +155,12 @@ def main():
       num_repeats = raw_input("How many gens would you like to run?\n")
       for x in range(0, int(num_repeats)):
 	y = 0
+        fitness_sum = 0
         for genomes in genome_list:
           evaluate(song_list[y], (fitness_func.functions[func_choice]),genomes, *args )
-	  y = y + 1
-	  
+          fitness_sum += song_list[y].fitness
+	  y = y+1
+	print "Gen", GEN_NUM, "has average fitness of:",(fitness_sum / y)
 	population.Epoch()
 	genome_list = NEAT.GetGenomeList(population)
 	song_list = advance_gen(genome_list)
