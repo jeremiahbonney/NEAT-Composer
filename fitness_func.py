@@ -19,7 +19,7 @@ note_list = ['A-0', 'A#-0', 'B-0', 'C-1', 'C#-1', 'D-1', 'D#-1', 'E-1', 'F-1', '
 
 #Dictionary of all fitness functions, making it easier to call them
 
-
+#Seems to have upper bound of about 0.85 for popsize = 100
 def is_diatonic(a_song, *args):  #Checks to see if all notes are diatonic (no # or b)
   sum = 0
   fitness = 0
@@ -33,7 +33,7 @@ def is_diatonic(a_song, *args):  #Checks to see if all notes are diatonic (no # 
   a_song.fitness = sum / a_song.length
   return a_song.fitness
 
-
+#Upper bound of 0.6ish for popsize = 100
 def in_range(a_song, *args):  #Checks to see if all notes fall within a certain range
   sum = 0
   lower = args[0]

@@ -2,7 +2,7 @@
 #and hopefully make transfering to a GUI easier. Also puts fitness
 #functions and other messy stuff in the fitness_func.py file.
 
-
+import sys
 import MultiNEAT as NEAT
 #from mingus.midi import fluidsynth  # Commented out until they work on lab machines
 #from mingus.midi import MidiFileOut
@@ -11,7 +11,6 @@ from mingus.containers.Bar import Bar
 from mingus.containers.Note import Note
 from mingus.core import *
 import random
-import sys
 import fitness_func  #contains fitness functions and other useful stuff
 
 LENGTH = 8.0 #Global var for song length
@@ -148,8 +147,8 @@ def main():
       func_choice = raw_input("Select fitness function: diatonic, or in_range\n")
       args = ()
       if(func_choice == "in_range"):
-        arg1 = raw_input("Enter a lower range: \n")
-	arg2 = raw_input("Enter an upper range: \n")
+        arg1 = int(raw_input("Enter a lower range: \n"))
+	arg2 = int(raw_input("Enter an upper range: \n"))
 	args = (arg1, arg2)
 
       num_repeats = raw_input("How many gens would you like to run?\n")
