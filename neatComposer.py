@@ -13,13 +13,14 @@ from mingus.core import *
 import random
 import fitness_func  #contains fitness functions and other useful stuff
 from Tkinter import *
+import tkSimpleDialog
 
 LENGTH = 12.0 #Global var for song length, must be a multiple of 4 for now
 GEN_NUM = 0
 #Song class that keeps all the information about the song in one place, including
 #the track itself, it's fitness, what generation it belongs to, it's length, etc
 params = NEAT.Parameters()
-params.PopulationSize = 100
+params.PopulationSize = 12
 
 params.DynamicCompatibility = True
 params.CompatTreshold = 2.0
@@ -90,18 +91,20 @@ class Song:
     return
 
   def print_song(self): #Prints the song id and the notes (add duration too?)
-    print self.song_id
+    str_song = str(self.song_id) + " "
     for x in range(0,(int)(self.length/4)):
-      for num in range(0,4): print(self.song[x][num][2][0]),
+      for num in range(0,4): str_song = str_song + str(self.song[x][num][2][0])
     
-    print
-    return
+#    print
+    return str_song
 
   def play_song(self):  #Plays the song at 150 BPM using fluidsynth(make BPM a var later?)
+    print "play song called on song", self.song_id
  #   fluidsynth.play_Track(self.song, 1, 150)
     return
 
   def export_song(self, filename):
+    print "export song called on song", self.song_id
    # MidiFileOut.write_Track(filename, self.song, self.bpm, 0)
     pass
     
@@ -128,6 +131,26 @@ def advance_gen(genome_list):  #Advances population to next generation
   return song_list
 
 
+def song_clicked(i):
+  index = int(listbox.curselection()[0])
+  print(song_list[index].print_song())
+  song_list[index].play_song()
+
+def print_all():
+  for song in song_list:
+    print song.print_song() + "\n"  
+
+def in_key_choice():
+  global choice
+  choice = tkSimpleDialog.askstring("Key Choice", "Enter key you with to restrict to")
+  print "In key choice is", choice
+
+def evaluate_pop():
+  args = (choice)
+  print choice, func_choice
+  for song in song_list:
+    evaluate(song, fitness_func.functions[str(func_choice)], genomes, *args)
+  
 def main():
   #creates default NEAT Genome
   
@@ -205,4 +228,65 @@ def main():
       sys.exit("Program exited")
 
 
-main()
+
+#main()
+
+choice = "C"
+
+
+population = NEAT.Population(genome, params, True, 1.0)
+genome_list = NEAT.GetGenomeList(population)
+song_list = advance_gen(genome_list)
+
+
+
+root = Tk()
+frame = Frame(root)
+frame.grid(row=0, column=0)
+
+framelistbox = Frame(root)
+framelistbox.grid(row = 0, column = 2)
+
+func_choice = StringVar()
+func_choice.set("DEFAULT")
+
+evaluateButton = Button(frame, text = "Evaluate population", command = evaluate_pop)
+evaluateButton.grid(row = 2, column = 0)
+
+evolveButton = Button(frame, text = "Evolve population")
+evolveButton.grid(row = 3, column = 0)
+
+menu = Menu(root)
+filemenu = Menu(menu)
+menu.add_cascade(label="File", menu = filemenu)
+filemenu.add_command(label = "Export Song")
+
+viewmenu = Menu(menu)
+menu.add_cascade(label = "View", menu = viewmenu)
+viewmenu.add_command(label = "Print all", command = print_all)
+
+root.config(menu = menu)
+
+yscroll = Scrollbar(framelistbox, relief = 'raised')
+yscroll.grid(row=0, column=1)
+
+
+listbox = Listbox(framelistbox, yscrollcommand = yscroll.set, width = 20, height = 8)
+for song in song_list:
+  listbox.insert(END, "Song: "+ str(song.song_id) + "    Fitness:" + str( song.fitness))
+listbox.grid(row = 0, column = 0)
+yscroll.config(command = listbox.yview)
+listbox.bind('<<ListboxSelect>>', song_clicked)
+
+fitnesslabel = Label(frame, text = "Fitness Functions")
+fitnesslabel.grid(row = 0, column = 0)
+
+in_key_label = Radiobutton(frame, text = "In Key", variable = func_choice, value = "in_key", command = in_key_choice)
+in_key_label.grid(row = 1, column = 0)
+
+diatonic_label = Radiobutton(frame, text = "Diatonic", variable = func_choice, value = "diatonic")
+diatonic_label.grid(row = 1, column = 1)
+
+
+
+root.mainloop()
