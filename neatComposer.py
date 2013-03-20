@@ -12,8 +12,9 @@ from mingus.containers.Note import Note
 from mingus.core import *
 import random
 import fitness_func  #contains fitness functions and other useful stuff
+from Tkinter import *
 
-LENGTH = 8.0 #Global var for song length
+LENGTH = 12.0 #Global var for song length, must be a multiple of 4 for now
 GEN_NUM = 0
 #Song class that keeps all the information about the song in one place, including
 #the track itself, it's fitness, what generation it belongs to, it's length, etc
@@ -126,6 +127,7 @@ def advance_gen(genome_list):  #Advances population to next generation
     x = x+1
   return song_list
 
+
 def main():
   #creates default NEAT Genome
   
@@ -144,12 +146,11 @@ def main():
 
     elif(choice == "2"): #User picks a fitness function and all songs are evaluated 
   		     #using that fitness function. Can happen for many generations
-      func_choice = raw_input("Select fitness function: diatonic, or in_range\n")
+      func_choice = raw_input("Select fitness function: diatonic, or in_key\n")
       args = ()
-      if(func_choice == "in_range"):
-        arg1 = int(raw_input("Enter a lower range: \n"))
-	arg2 = int(raw_input("Enter an upper range: \n"))
-	args = (arg1, arg2)
+      if(func_choice == "in_key"):
+        arg1 = raw_input("What key would you like to use? A, B, etc...\n")
+	args = (arg1)
 
       num_repeats = raw_input("How many gens would you like to run?\n")
       for x in range(0, int(num_repeats)):
@@ -202,5 +203,6 @@ def main():
 
     elif(choice == "8"): #exits program
       sys.exit("Program exited")
+
 
 main()
