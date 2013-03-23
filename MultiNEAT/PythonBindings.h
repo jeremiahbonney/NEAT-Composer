@@ -27,6 +27,8 @@
 
 
 #include <boost/python.hpp>
+#include <boost/python/numeric.hpp>
+#include <boost/python/tuple.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include "NeuralNetwork.h"
@@ -44,6 +46,7 @@ using namespace py;
 
 BOOST_PYTHON_MODULE(MultiNEAT)
 {
+	numeric::array::set_module_and_type("numpy", "ndarray");
 
 ///////////////////////////////////////////////////////////////////
 // Enums
@@ -117,12 +120,13 @@ BOOST_PYTHON_MODULE(MultiNEAT)
 			.def_readwrite("substrate_coords", &Neuron::m_substrate_coords)
 			;
 
-	void (NeuralNetwork::*NN_Save)(char*) = &NeuralNetwork::Save;
-	bool (NeuralNetwork::*NN_Load)(char*) = &NeuralNetwork::Load;
-	void (Genome::*Genome_Save)(char*) = &Genome::Save;
-	void (NeuralNetwork::*NN_Input)(list&) = &NeuralNetwork::Input;
-	void (Parameters::*Parameters_Save)(char*) = &Parameters::Save;
-	int (Parameters::*Parameters_Load)(char*) = &Parameters::Load;
+	void (NeuralNetwork::*NN_Save)(const char*) = &NeuralNetwork::Save;
+	bool (NeuralNetwork::*NN_Load)(const char*) = &NeuralNetwork::Load;
+	void (Genome::*Genome_Save)(const char*) = &Genome::Save;
+	void (NeuralNetwork::*NN_Input)(list&) = &NeuralNetwork::Input_python_list;
+	void (NeuralNetwork::*NN_Input_numpy)(numeric::array&) = &NeuralNetwork::Input_numpy;
+	void (Parameters::*Parameters_Save)(const char*) = &Parameters::Save;
+	int (Parameters::*Parameters_Load)(const char*) = &Parameters::Load;
 
 	class_<NeuralNetwork>("NeuralNetwork", init<>())
 
@@ -168,13 +172,14 @@ BOOST_PYTHON_MODULE(MultiNEAT)
 
 			.def("Input",
 			NN_Input)
+			.def("Input",
+			NN_Input_numpy)
 			.def("Output",
 			&NeuralNetwork::Output)
 
 			.def_readwrite("neurons", &NeuralNetwork::m_neurons)
 			.def_readonly("connections", &NeuralNetwork::m_connections)
 			;
-	// also for future implement NumPy 1D array to std::vector<double>
 
 
 
@@ -295,7 +300,7 @@ BOOST_PYTHON_MODULE(MultiNEAT)
 			.def_readwrite("InnovationsForever", &Parameters::InnovationsForever)
 			.def_readwrite("YoungAgeTreshold", &Parameters::YoungAgeTreshold)
 			.def_readwrite("YoungAgeFitnessBoost", &Parameters::YoungAgeFitnessBoost)
-			.def_readwrite("SpeciesDropoffAge", &Parameters::SpeciesDropoffAge)
+			.def_readwrite("SpeciesDropoffAge", &Parameters::SpeciesMaxStagnation)
 			.def_readwrite("StagnationDelta", &Parameters::StagnationDelta)
 			.def_readwrite("OldAgeTreshold", &Parameters::OldAgeTreshold)
 			.def_readwrite("OldAgePenalty", &Parameters::OldAgePenalty)

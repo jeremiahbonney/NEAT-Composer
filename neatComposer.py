@@ -14,6 +14,7 @@ import random
 import fitness_func  #contains fitness functions and other useful stuff
 from Tkinter import *
 import tkSimpleDialog
+import tkFileDialog
 
 LENGTH = 12.0 #Global var for song length, must be a multiple of 4 for now
 GEN_NUM = 0
@@ -99,14 +100,14 @@ class Song:
     return str_song
 
   def play_song(self):  #Plays the song at 150 BPM using fluidsynth(make BPM a var later?)
-    print "play song called on song", self.song_id
+    pass
  #   fluidsynth.play_Track(self.song, 1, 150)
-    return
+    #return
 
   def export_song(self, filename):
-    print "export song called on song", self.song_id
-   # MidiFileOut.write_Track(filename, self.song, self.bpm, 0)
     pass
+   # MidiFileOut.write_Track(filename, self.song, self.bpm, 0)
+    #pass
     
 #End of Song Class
 
@@ -120,15 +121,15 @@ def evaluate(a_song, fitness_func, genome, *args):      #Takes a song and fitnes
 
 def advance_gen(genome_list):  #Advances population to next generation
   global GEN_NUM
-  song_list = []
+  song_list2 = []
   x = 1
   GEN_NUM = GEN_NUM+1
   for genomes in genome_list:
     c = Song(genomes, GEN_NUM, x, LENGTH)
-    song_list.append(c)
-    song_list[x-1].gen_song()
+    song_list2.append(c)
+    song_list2[x-1].gen_song()
     x = x+1
-  return song_list
+  return song_list2
 
 
 def song_clicked(i):
@@ -147,9 +148,31 @@ def in_key_choice():
 
 def evaluate_pop():
   args = (choice)
-  print choice, func_choice
+  y = 0
+  for genomes in genome_list:
+    evaluate(song_list[y], fitness_func.functions[func_choice.get()], genomes, *args)
+    y = y + 1
+  listbox.delete(0, END);
   for song in song_list:
-    evaluate(song, fitness_func.functions[str(func_choice)], genomes, *args)
+    listbox.insert(END, "Song: "+ str(song.song_id) + "    Fitness:" + str( song.fitness))
+
+def evolve_pop():
+  global population
+  global song_list
+  global genome_list
+  population.Epoch()
+  genome_list = NEAT.GetGenomeList(population)
+  song_list = advance_gen(genome_list)
+  listbox.delete(0, END)
+  for song in song_list:
+    listbox.insert(END, "Song: "+ str(song.song_id) + "    Fitness:" + str( song.fitness))
+
+def export():
+  filename = tkFileDialog.asksaveasfilename(parent = root)
+  song = listbox.index(ACTIVE)
+  print filename, song
+  song_list[song].export_song(filename)
+  
   
 def main():
   #creates default NEAT Genome
@@ -253,13 +276,13 @@ func_choice.set("DEFAULT")
 evaluateButton = Button(frame, text = "Evaluate population", command = evaluate_pop)
 evaluateButton.grid(row = 2, column = 0)
 
-evolveButton = Button(frame, text = "Evolve population")
+evolveButton = Button(frame, text = "Evolve population", command = evolve_pop)
 evolveButton.grid(row = 3, column = 0)
 
 menu = Menu(root)
 filemenu = Menu(menu)
 menu.add_cascade(label="File", menu = filemenu)
-filemenu.add_command(label = "Export Song")
+filemenu.add_command(label = "Export Song", command = export)
 
 viewmenu = Menu(menu)
 menu.add_cascade(label = "View", menu = viewmenu)

@@ -1,7 +1,7 @@
 PythonBindings.d: ../PythonBindings.cpp ../PythonBindings.h \
  ../NeuralNetwork.h ../Genes.h ../Parameters.h ../Genome.h ../Substrate.h \
  ../Innovation.h ../Assert.h ../PhenotypeBehavior.h ../Random.h \
- ../MTwistRand.h ../Population.h ../Species.h
+ ../Population.h ../Species.h
 
 ../PythonBindings.h:
 
@@ -22,8 +22,6 @@ PythonBindings.d: ../PythonBindings.cpp ../PythonBindings.h \
 ../PhenotypeBehavior.h:
 
 ../Random.h:
-
-../MTwistRand.h:
 
 ../Population.h:
 

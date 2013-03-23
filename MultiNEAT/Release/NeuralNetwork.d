@@ -1,5 +1,5 @@
 NeuralNetwork.d: ../NeuralNetwork.cpp ../NeuralNetwork.h ../Genes.h \
- ../Parameters.h ../Utils.h ../Assert.h ../Random.h ../MTwistRand.h
+ ../Parameters.h ../Utils.h ../Assert.h ../Random.h
 
 ../NeuralNetwork.h:
 
@@ -12,5 +12,3 @@ NeuralNetwork.d: ../NeuralNetwork.cpp ../NeuralNetwork.h ../Genes.h \
 ../Assert.h:
 
 ../Random.h:
-
-../MTwistRand.h:

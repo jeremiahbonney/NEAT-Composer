@@ -77,7 +77,7 @@ void Parameters::Reset()
     YoungAgeFitnessBoost = 1.1;
 
     // Number of generations without improvement (stagnation) allowed for a species
-    SpeciesDropoffAge = 50;
+    SpeciesMaxStagnation = 50;
 
     // Minimum jump in fitness necessary to be considered as improvement.
     // Setting this value to 0.0 makes the system to behave like regular NEAT.
@@ -110,11 +110,11 @@ void Parameters::Reset()
     OverallMutationRate = 0.25;
 
     // Probability for a baby to result from inter-species mating.
-    InterspeciesCrossoverRate = 0.0001;
+    InterspeciesCrossoverRate = 0.001;
 
     // Probability for a baby to result from Multipoint Crossover when mating. 1.0 = 100%
     // The default is the Average mating.
-    MultipointCrossoverRate = 0.75;
+    MultipointCrossoverRate = 0.5;
 
     // Performing roulette wheel selection or not?
     RouletteWheelSelection = false;
@@ -227,10 +227,10 @@ void Parameters::Reset()
     ///////////////////////////////////
 
     // Probability for a baby's weights to be mutated
-    MutateWeightsProb = 0.75;
+    MutateWeightsProb = 0.90;
 
     // Probability for a severe (shaking) weight mutation
-    MutateWeightsSevereProb = 0.25;
+    MutateWeightsSevereProb = 0.5;
 
     // Probability for a particular gene's weight to be mutated. 1.0 = 100%
     WeightMutationRate = 1.0;
@@ -346,7 +346,7 @@ void Parameters::Reset()
     MinCompatTreshold = 0.2;
 
     // Modifier per generation for keeping the species stable
-    CompatTresholdModifier = 0.2;
+    CompatTresholdModifier = 0.3;
 
     // Per how many generations to change the treshold
     // (used in generational mode)
@@ -409,7 +409,7 @@ int Parameters::Load(std::ifstream& a_DataFile)
             a_DataFile >> YoungAgeFitnessBoost;
 
         if (s == "SpeciesDropoffAge")
-            a_DataFile >> SpeciesDropoffAge;
+            a_DataFile >> SpeciesMaxStagnation;
 
         if (s == "StagnationDelta")
             a_DataFile >> StagnationDelta;
@@ -703,7 +703,7 @@ int Parameters::Load(std::ifstream& a_DataFile)
 }
 
 
-int Parameters::Load(char* a_FileName)
+int Parameters::Load(const char* a_FileName)
 {
     std::ifstream data(a_FileName);
     if (!data.is_open())
@@ -714,7 +714,7 @@ int Parameters::Load(char* a_FileName)
     return result;
 }
 
-void Parameters::Save(char* filename)
+void Parameters::Save(const char* filename)
 {
 	FILE* f = fopen(filename, "w");
 	Save(f);
@@ -733,7 +733,7 @@ void Parameters::Save(FILE* a_fstream)
 	fprintf(a_fstream, "InnovationsForever %s\n", InnovationsForever==true?"true":"false");
 	fprintf(a_fstream, "YoungAgeTreshold %d\n", YoungAgeTreshold);
 	fprintf(a_fstream, "YoungAgeFitnessBoost %3.20f\n", YoungAgeFitnessBoost);
-	fprintf(a_fstream, "SpeciesDropoffAge %d\n", SpeciesDropoffAge);
+	fprintf(a_fstream, "SpeciesDropoffAge %d\n", SpeciesMaxStagnation);
 	fprintf(a_fstream, "StagnationDelta %3.20f\n", StagnationDelta);
 	fprintf(a_fstream, "OldAgeTreshold %d\n", OldAgeTreshold);
 	fprintf(a_fstream, "OldAgePenalty %3.20f\n", OldAgePenalty);

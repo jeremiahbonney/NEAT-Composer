@@ -1,7 +1,4 @@
-Random.d: ../Random.cpp ../MTwistRand.h ../Utils.h ../Assert.h \
- ../Random.h
-
-../MTwistRand.h:
+Random.d: ../Random.cpp ../Utils.h ../Assert.h ../Random.h
 
 ../Utils.h:
 
