@@ -1,3 +1,5 @@
+#This is a text based version of NEAT Composer which was the beta before creating the UI version, which has more features.
+
 #from mingus.midi import fluidsynth
 #from mingus.containers.Note import Note
 #from mingus.containers.Bar import Bar

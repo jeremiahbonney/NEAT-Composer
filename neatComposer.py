@@ -4,8 +4,8 @@
 
 import sys
 import MultiNEAT as NEAT
-#from mingus.midi import fluidsynth  # Commented out until they work on lab machines
-#from mingus.midi import MidiFileOut
+from mingus.midi import fluidsynth  # Commented out until they work on lab machines
+from mingus.midi import MidiFileOut
 from mingus.containers.Track import Track
 from mingus.containers.Bar import Bar
 from mingus.containers.Note import Note
@@ -13,9 +13,12 @@ from mingus.core import *
 import random
 import fitness_func  #contains fitness functions and other useful stuff
 from Tkinter import *
+from Tkinter import Tk
 import tkSimpleDialog
 import tkFileDialog
+import novelty
 
+fluidsynth.init("FluidR3_GM.sf2", "alsa")
 LENGTH = 12.0 #Global var for song length, must be a multiple of 4 for now
 GEN_NUM = 0
 #Song class that keeps all the information about the song in one place, including
@@ -65,6 +68,9 @@ class Song:
   length = 0.0
   song_id = 0
   bpm = 150
+  novelty_params = []
+  novelty_score = 0
+  
 
   def __init__(self, genome, gen_num, song_id, length): #Global var for song length, song_id):
   
@@ -100,13 +106,11 @@ class Song:
     return str_song
 
   def play_song(self):  #Plays the song at 150 BPM using fluidsynth(make BPM a var later?)
-    pass
- #   fluidsynth.play_Track(self.song, 1, 150)
-    #return
+    fluidsynth.play_Track(self.song, 1, 150)
+    return
 
   def export_song(self, filename):
-    pass
-   # MidiFileOut.write_Track(filename, self.song, self.bpm, 0)
+    MidiFileOut.write_Track(filename, self.song, self.bpm, 0)
     #pass
     
 #End of Song Class
@@ -131,6 +135,11 @@ def advance_gen(genome_list):  #Advances population to next generation
     x = x+1
   return song_list2
 
+def redraw_listbox():
+  listbox.delete(0, END);
+  for song in song_list:
+    listbox.insert(END, "Song: %d.%d" %(GEN_NUM, song.song_id) + "    Fitness:" + str( song.fitness) + "    Novelty:" + str(song.novelty_score))
+
 
 def song_clicked(i):
   index = int(listbox.curselection()[0])
@@ -139,7 +148,11 @@ def song_clicked(i):
 
 def print_all():
   for song in song_list:
-    print song.print_song() + "\n"  
+    print song.print_song() + "\n" 
+  print "\n" 
+
+def print_song_prop():
+  pass
 
 def in_key_choice():
   global choice
@@ -148,13 +161,17 @@ def in_key_choice():
 
 def evaluate_pop():
   args = (choice)
+  in_key_offset = in_key_slider.get()
+  diatonic_offset = diatonic_slider.get()
+  in_key_fitness = 0
+  diatonic_fitness = 0
   y = 0
   for genomes in genome_list:
-    evaluate(song_list[y], fitness_func.functions[func_choice.get()], genomes, *args)
-    y = y + 1
-  listbox.delete(0, END);
-  for song in song_list:
-    listbox.insert(END, "Song: "+ str(song.song_id) + "    Fitness:" + str( song.fitness))
+    in_key_fitness = evaluate(song_list[y], fitness_func.functions["in_key"], genomes, *args)
+    diatonic_fitness = evaluate(song_list[y], fitness_func.functions["diatonic"], genomes, *args)
+    song_list[y].fitness = (in_key_fitness*in_key_offset + diatonic_fitness*diatonic_offset)/2.0
+    y = y+1
+  redraw_listbox()
 
 def evolve_pop():
   global population
@@ -163,9 +180,7 @@ def evolve_pop():
   population.Epoch()
   genome_list = NEAT.GetGenomeList(population)
   song_list = advance_gen(genome_list)
-  listbox.delete(0, END)
-  for song in song_list:
-    listbox.insert(END, "Song: "+ str(song.song_id) + "    Fitness:" + str( song.fitness))
+  redraw_listbox()
 
 def export():
   filename = tkFileDialog.asksaveasfilename(parent = root)
@@ -173,86 +188,13 @@ def export():
   print filename, song
   song_list[song].export_song(filename)
   
-  
-def main():
-  #creates default NEAT Genome
-  
-  
-  population = NEAT.Population(genome, params, True, 1.0)
-  genome_list = NEAT.GetGenomeList(population)
-  song_list = advance_gen(genome_list)
-
-#Main program loop
-  while(1):
-    choice = raw_input("Choose one of the following\n1) Print population\n2) Eval pop with fitness function\n3) Manually assign fitness\n4) Print fitness of POP\n5) Play a song\n6) Advance to next Generation\n7) Export song to midi file\n8) Exit\n")
-  
-    if(choice == "1"): #Goes through and prints all songs
-      for song in song_list:
-        song.print_song()
-
-    elif(choice == "2"): #User picks a fitness function and all songs are evaluated 
-  		     #using that fitness function. Can happen for many generations
-      func_choice = raw_input("Select fitness function: diatonic, or in_key\n")
-      args = ()
-      if(func_choice == "in_key"):
-        arg1 = raw_input("What key would you like to use? A, B, etc...\n")
-	args = (arg1)
-
-      num_repeats = raw_input("How many gens would you like to run?\n")
-      for x in range(0, int(num_repeats)):
-	y = 0
-        fitness_sum = 0
-        for genomes in genome_list:
-          evaluate(song_list[y], (fitness_func.functions[func_choice]),genomes, *args )
-          fitness_sum += song_list[y].fitness
-	  y = y+1
-	print "Gen", GEN_NUM, "has average fitness of:",(fitness_sum / y)
-	population.Epoch()
-	genome_list = NEAT.GetGenomeList(population)
-	song_list = advance_gen(genome_list)
+def novelty_func():
+  novelty.set_novelty_params(song_list)
+  novelty.novelty_search(song_list)
+  redraw_listbox()
     
-      y = 0
-      for genomes in genome_list:
-        evaluate(song_list[y], (fitness_func.functions[func_choice]),genomes, *args )
-        y = y + 1
-
-
-
-    elif(choice == "3"): #Pick a song out of the population and change it's fitness
-      song_choice = raw_input("Which song's fitness would you like to change?\n")
-      new_fit = raw_input("Enter new fitness\n")
-      old_fit = song_list[(int)(song_choice)-1].fitness
-      song_list[(int)(song_choice)-1].fitness = new_fit
-      print "Song", song_choice, "fitness changed from", old_fit, "to", new_fit, "\n"
-
-    elif(choice == "4"):
-      for song in song_list:
-        print "Song", song.song_id , "has fitness", song.fitness
-
-    elif(choice == "5"): #Gets user choice of song and plays it
-      song_choice = (int)(raw_input("Which song would you like to play?\n"))
-      song_list[song_choice-1].play_song()
   
-    elif(choice == "6"): #Advances to next generation and gets new population/songs
-      y = 0
-      for genomes in genome_list: #Shouldn't be necessary, but just in case
-	genomes.SetFitness(song_list[y].fitness)
-      population.Epoch()
-      genome_list = NEAT.GetGenomeList(population)
-      song_list = advance_gen(genome_list)
-      
 
-    elif(choice == "7"): #Exports to midi file
-      song_choice = (int)(raw_input("Which song would you like to export?\n"))
-      file_name = raw_input("Enter filename of midi file you want to create?\n")
-      song_list[song_choice-1].export_song(file_name)
-
-    elif(choice == "8"): #exits program
-      sys.exit("Program exited")
-
-
-
-#main()
 
 choice = "C"
 
@@ -264,20 +206,35 @@ song_list = advance_gen(genome_list)
 
 
 root = Tk()
+root.wm_title("NEAT Composer")
+
 frame = Frame(root)
+
 frame.grid(row=0, column=0)
+
+framenovelty = Frame(root)
+framenovelty.grid(row=0, column=1)
 
 framelistbox = Frame(root)
 framelistbox.grid(row = 0, column = 2)
 
-func_choice = StringVar()
-func_choice.set("DEFAULT")
+
+
+nov1 = IntVar()
+nov1.set(0)
+nov2 = IntVar()
+nov2.set(0)
+nov3 = IntVar()
+nov3.set(0)
 
 evaluateButton = Button(frame, text = "Evaluate population", command = evaluate_pop)
-evaluateButton.grid(row = 2, column = 0)
+evaluateButton.grid(row = 4, column = 0)
+
+noveltyButton = Button(framenovelty, text = "Use Novelty", command = novelty_func)
+noveltyButton.grid(row=4, column = 0)
 
 evolveButton = Button(frame, text = "Evolve population", command = evolve_pop)
-evolveButton.grid(row = 3, column = 0)
+evolveButton.grid(row = 5, column = 0)
 
 menu = Menu(root)
 filemenu = Menu(menu)
@@ -294,22 +251,33 @@ yscroll = Scrollbar(framelistbox, relief = 'raised')
 yscroll.grid(row=0, column=1)
 
 
-listbox = Listbox(framelistbox, yscrollcommand = yscroll.set, width = 20, height = 8)
+listbox = Listbox(framelistbox, yscrollcommand = yscroll.set, width = 40, height = 8)
 for song in song_list:
-  listbox.insert(END, "Song: "+ str(song.song_id) + "    Fitness:" + str( song.fitness))
+  listbox.insert(END, "Song: %d.%d" %(GEN_NUM, song.song_id) + "    Fitness:" + str( song.fitness) + "    Novelty:" + str(song.novelty_score))
+
 listbox.grid(row = 0, column = 0)
 yscroll.config(command = listbox.yview)
 listbox.bind('<<ListboxSelect>>', song_clicked)
 
 fitnesslabel = Label(frame, text = "Fitness Functions")
 fitnesslabel.grid(row = 0, column = 0)
+noveltylabel = Label(framenovelty, text= "Novelty Parameters")
+noveltylabel.grid(row=0, column=0)
 
-in_key_label = Radiobutton(frame, text = "In Key", variable = func_choice, value = "in_key", command = in_key_choice)
-in_key_label.grid(row = 1, column = 0)
+song_slope_button = Checkbutton(framenovelty, text = "Song Slope", variable = nov1, offvalue=0, onvalue=1)
+song_slope_button.grid(row = 1, column = 0)
 
-diatonic_label = Radiobutton(frame, text = "Diatonic", variable = func_choice, value = "diatonic")
-diatonic_label.grid(row = 1, column = 1)
+song_var_button = Checkbutton(framenovelty, text = "Song Variance", variable = nov2, offvalue = 0, onvalue=1)
+song_var_button.grid(row = 2, column = 0)
+song_range_button = Checkbutton(framenovelty, text = "Song Range", variable = nov3, offvalue = 0, onvalue = 1)
+song_range_button.grid(row=3, column = 0)
 
 
+in_key_button = Button(frame, text = "Set Key", command = in_key_choice)
+in_key_button.grid(row=1, column=0)
+in_key_slider = Scale(frame, from_=-100, to=100, orient=HORIZONTAL, label="InKey")
+in_key_slider.grid(row=2, column=0)
+diatonic_slider = Scale(frame, from_=-100, to=100, orient=HORIZONTAL, label="Diatonic")
+diatonic_slider.grid(row=3, column=0)
 
 root.mainloop()
